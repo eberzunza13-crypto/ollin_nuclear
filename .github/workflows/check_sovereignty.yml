@@ -1,0 +1,63 @@
+cat > .github/workflows/check_sovereignty.yml << 'EOF'
+name: Verificación de Soberanía
+
+on:
+  push:
+    branches: [ main, master, develop ]
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  sovereignty-check:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Configurar Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'
+    
+    - name: Verificar estructura de archivos
+      run: |
+        echo "=== VERIFICANDO ESTRUCTURA ==="
+        test -f core/__init__.py && echo "✅ core/__init__.py existe"
+        test -f core/anthelion_physics.py && echo "✅ core/anthelion_physics.py existe"
+        test -f core/ometeotl_guard.py && echo "✅ core/ometeotl_guard.py existe"
+        test -f core/noosphere_auth.py && echo "✅ core/noosphere_auth.py existe"
+        test -f examples/integrated_v30_demo.py && echo "✅ examples/integrated_v30_demo.py existe"
+    
+    - name: Verificar sintaxis Python
+      run: |
+        echo "=== VERIFICANDO SINTAXIS ==="
+        python -m py_compile core/*.py
+        python -m py_compile examples/*.py
+        echo "✅ Todos los archivos compilan correctamente"
+    
+    - name: Ejecutar pruebas de integridad
+      run: |
+        echo "=== EJECUTANDO PRUEBAS DE INTEGRIDAD ==="
+        cd examples
+        python integrated_v30_demo.py
+        echo "✅ Demo ejecutada correctamente"
+    
+    - name: Verificar manifiesto de soberanía
+      run: |
+        echo "=== VERIFICANDO MANIFIESTO ==="
+        if [ -f SOVEREIGNTY_MANIFEST.md ]; then
+          echo "✅ SOVEREIGNTY_MANIFEST.md existe"
+          wc -l SOVEREIGNTY_MANIFEST.md
+        else
+          echo "⚠️  SOVEREIGNTY_MANIFEST.md no encontrado"
+          exit 1
+        fi
+    
+    - name: Reporte final
+      run: |
+        echo "========================================"
+        echo "✅ TODAS LAS VERIFICACIONES PASARON ✅"
+        echo "========================================"
+        echo "La soberanía del código está confirmada."
+EOF

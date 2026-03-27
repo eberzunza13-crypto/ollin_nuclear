@@ -1,0 +1,10 @@
+__pycache__/
+*.db
+*.zip
+*.odt
+*.pdf
+venv/
+*.bak
+*.save
+.~lock*
+backup_*/
